@@ -1,0 +1,103 @@
+<loading hidden="{{hidden}}" bind-change="loadingChange">
+    加载中...
+  </loading>  
+ <scroll-view scroll-y="true" style="height: 100%;" bindscrolltolower="loadMore" bindscrolltoup-per="refesh">
+      <view wx:if="{{hasRefesh}}" style="display: flex;flex-direction: row;align-items: center;align-self: center;justify-content: center;">
+      <icon type="waiting" size="45"/><text>刷新中...</text></view>
+      <view wx:else  style="display:none" ><text></text></view>
+  <view class="lll"  wx:for="{{list}}" wx:for-item="item" bindtap="bindViewTap" 
+         data-title="{{item.title}}" >
+      <image style=" width: 50px;height: 50px;margin: 20rpx;" src="{{item.firstImg}}"   ></image>
+      <view  class="eee" > 
+       <view style="margin:5px;font-size:8px"> 标题:{{item.title}}</view>
+       <view style="margin:5px;color:red;font-size:6px"> 来源:{{item.source}}</view>
+       </view>
+</view>
+<view class="tips1">
+      <view wx:if="{{hasMore}}" style="display: flex;flex-direction: row;align-items: center;align-self: center;justify-content: center;">
+      <icon type="waiting" size="45"/><text>玩命的加载中...</text></view>
+      <view wx:else><text>没有更多内容了</text></view>
+    </view>
+ </scroll-view>
+
+
+var network_util = re-quire('../../utils/network_util.js');
+var json_util = require('../../utils/json_util.js');
+Page({
+  data:{
+    // text:"这是一个页面"
+    list:[],
+     dd:'',
+     hidden:false,
+     page: 1,
+     size: 20,
+     hasMore:true,
+     hasRefesh:false
+  },
+  onLoad:function(options){
+    var that = this;
+    var url = 'http://v.juhe.cn/weixin/query?key=f16af393a63364b729fd81ed9fdd4b7d&pno=1&ps=10';
+    network_util._get(url,
+    function(res){
+    that.setData({
+       list:res.data.result.list,
+       hidden: true,
+    });
+    },function(res){
+     console.log(res);
+ });
+  },
+  onReady:function(){
+    // 页面渲染完成
+  },
+  onShow:function(){
+    // 页面显示
+  },
+  onHide:function(){
+    // 页面隐藏
+  },
+  onUnload:function(){
+    // 页面关闭
+  },
+   //点击事件处理
+  bindViewTap: function(e) {
+    console.log(e.currentTarget.dataset.title);
+  },
+  //加载更多
+  loadMore: function(e) {
+     var that = this;
+    that.setData({
+    hasRefesh:true,});
+    if (!this.data.hasMore) return
+    var url = 'http://v.juhe.cn/weixin/query?key=f16af393a63364b729fd81ed9fdd4b7d&pno='+(++that.data.page)+'&ps=10';
+    network_util._get(url,
+    function(res){
+    that.setData({
+       list: that.data.list.concat(res.data.result.list),
+       hidden: true,
+       hasRefesh:false,
+    });
+    },function(res){
+     console.log(res);
+  })
+},
+//刷新处理
+refesh: function(e) {
+ var that = this;
+ that.setData({
+    hasRefesh:true,
+ });
+    var url = 'http://v.juhe.cn/weixin/query?key=f16af393a63364b729fd81ed9fdd4b7d&pno=1&ps=10';
+    network_util._get(url,
+    function(res){
+    that.setData({
+      list:res.data.result.list,
+       hidden: true,
+       page:1,
+       hasRefesh:false,
+    });
+    },function(res){
+     console.log(res);
+ })
+},
+})
